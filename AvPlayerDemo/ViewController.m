@@ -34,15 +34,8 @@
                                                object:[_player.myAVPlayer currentItem]];
 
     [self.view addSubview: _player.view];
+    _player.view.backgroundColor = [UIColor blackColor];
     
-    
-//    NSArray *constraints = [NSLayoutConstraint
-//                            constraintsWithVisualFormat:@"V:|-offsetTop-[self.player.view]"
-//                     options:0
-//                     metrics:@{@"offsetTop": @100}
-//                   views:NSDictionaryOfVariableBindings(_player.view)];
-//    [self.view addConstraints:constraints];
-
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification

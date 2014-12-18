@@ -68,7 +68,8 @@
 }
 
 -(void) viewWillLayoutSubviews {
-    self.view.frame = [[UIScreen mainScreen] bounds];
+    self.view.frame = self.view.superview.bounds;
+    myAVPlayerLayer.frame = self.view.bounds;
 }
 
 - (void)didReceiveMemoryWarning
