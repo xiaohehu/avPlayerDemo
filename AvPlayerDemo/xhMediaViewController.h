@@ -17,7 +17,6 @@
 
 @interface xhMediaViewController : UIViewController
 
-@property (nonatomic, readwrite)        BOOL                       shouldRepeat;
 @property (nonatomic, strong)           AVPlayerItem               *playerItem;
 @property (nonatomic, strong)           AVPlayer                   *myAVPlayer;
 @property (nonatomic, strong)           AVPlayerLayer              *myAVPlayerLayer;

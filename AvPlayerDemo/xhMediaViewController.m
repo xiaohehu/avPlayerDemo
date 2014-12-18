@@ -12,12 +12,13 @@
 {
 
     NSURL           *fileURL;
+    UIView          *uiv_controlPanel;
+    UIButton        *uib_playPause;
 }
 
 @end
 
 @implementation xhMediaViewController
-@synthesize shouldRepeat;
 @synthesize myAVPlayer;
 @synthesize myAVPlayerLayer;
 @synthesize playerItem;
@@ -43,6 +44,7 @@
 {
 //    [self playWithURL:fileURL];
     self.view.frame = [[UIScreen mainScreen] bounds];
+    [self createControlPanel];
 }
 
 - (void)playWithURL:(NSURL *)url
@@ -60,11 +62,79 @@
     myAVPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:myAVPlayer];
     CGRect frame = self.view.bounds;
     myAVPlayerLayer.frame = frame;
-    myAVPlayerLayer.backgroundColor = [UIColor redColor].CGColor;
+    myAVPlayerLayer.backgroundColor = [UIColor whiteColor].CGColor;
     [self.view.layer addSublayer: myAVPlayerLayer];
     
     [myAVPlayer play];
+}
+
+- (void)createControlPanel
+{
+    uiv_controlPanel = [UIView new];
+    uiv_controlPanel.translatesAutoresizingMaskIntoConstraints = NO;
+    uiv_controlPanel.backgroundColor = [UIColor blackColor];
+    uiv_controlPanel.layer.borderWidth = 2.0;
+    uiv_controlPanel.layer.borderColor = [UIColor lightGrayColor].CGColor;
+    uiv_controlPanel.layer.cornerRadius = 10.0;
+    [self.view addSubview:uiv_controlPanel];
+ 
+    // Size contstraints
+    NSArray *control_constraint_H = [NSLayoutConstraint
+                                    constraintsWithVisualFormat:@"V:[uiv_controlPanel(60)]"
+                                    options:0
+                                    metrics:nil
+                                    views:NSDictionaryOfVariableBindings(uiv_controlPanel)];
+
+    NSArray *control_constraint_V = [NSLayoutConstraint
+                                constraintsWithVisualFormat:@"H:[uiv_controlPanel(300)]"
+                                options:0
+                                metrics:nil
+                                views:NSDictionaryOfVariableBindings(uiv_controlPanel)];
+    [self.view addConstraints: control_constraint_H];
+    [self.view addConstraints: control_constraint_V];
+    // Position constraints
+    NSArray *constraints = [NSLayoutConstraint
+                            constraintsWithVisualFormat:@"V:[uiv_controlPanel]-offsetBottom-|"
+                            options:0
+                            metrics:@{@"offsetBottom": @60}
+                            views:NSDictionaryOfVariableBindings(uiv_controlPanel)];
+
+    [self.view addConstraints: constraints];
     
+    [self.view addConstraint:
+        [NSLayoutConstraint constraintWithItem:uiv_controlPanel
+                              attribute:NSLayoutAttributeCenterX
+                              relatedBy:NSLayoutRelationEqual
+                                 toItem:self.view
+                              attribute:NSLayoutAttributeCenterX
+                             multiplier:1
+                               constant:0]];
+    
+    [self addControlButtons];
+
+}
+
+- (void)addControlButtons
+{
+    uib_playPause = [UIButton buttonWithType: UIButtonTypeCustom];
+    uib_playPause.frame = CGRectMake(0.0, 0.0, 300.0, 60.0);
+    [uib_playPause setTitle:@"PAUSE" forState:UIControlStateNormal];
+    [uib_playPause setTitle:@"PLAY" forState:UIControlStateSelected];
+    [uiv_controlPanel addSubview: uib_playPause];
+    [uib_playPause addTarget:self action:@selector(tapPlayPause:) forControlEvents:UIControlEventTouchUpInside];
+}
+
+- (void)tapPlayPause:(id)sender
+{
+    UIButton *tappedBtn = sender;
+    if (tappedBtn.selected) {
+        [myAVPlayer play];
+    }
+    else
+    {
+        [myAVPlayer pause];
+    }
+    tappedBtn.selected = !tappedBtn.selected;
 }
 
 -(void) viewWillLayoutSubviews {

@@ -15,6 +15,10 @@
 
 @implementation ViewController
 
+- (BOOL)prefersStatusBarHidden{
+    return YES;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
@@ -26,21 +30,16 @@
                      ofType:@"mov"];
     
     _player = [[xhMediaViewController alloc] initWithURL:[NSURL fileURLWithPath:url]];
-    _player.view.frame = [[UIScreen mainScreen] bounds];
-    _player.shouldRepeat = YES;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(playerItemDidReachEnd:)
                                                  name:AVPlayerItemDidPlayToEndTimeNotification
                                                object:[_player.myAVPlayer currentItem]];
 
-    [self.view addSubview: _player.view];
-    _player.view.backgroundColor = [UIColor blackColor];
-    
+    [self.view addSubview: _player.view];    
 }
 
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
-    NSLog(@"At the end of the movie");
     [_player.myAVPlayer seekToTime:kCMTimeZero];
     [_player.myAVPlayer play];
 }
