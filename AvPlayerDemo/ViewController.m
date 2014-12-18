@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "xhMediaViewController.h"
 
 @interface ViewController ()
 
@@ -17,6 +18,16 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+}
+
+- (IBAction)tapButton:(id)sender {
+    NSString *url = [[NSBundle mainBundle]
+                     pathForResource:@"neoscape_bug"
+                     ofType:@"mov"];
+    
+    xhMediaViewController *player = [[xhMediaViewController alloc] initWithURL:[NSURL fileURLWithPath:url]];
+    player.shouldRepeat = YES;
+    [self.view addSubview: player.view];
 }
 
 - (void)didReceiveMemoryWarning {
