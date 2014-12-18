@@ -7,30 +7,27 @@
 //
 
 #import "xhMediaViewController.h"
-#import <AVFoundation/AVPlayer.h>
-#import <AVFoundation/AVAsset.h>
-#import <AVFoundation/AVMediaFormat.h>
-#import <AVFoundation/AVAudioMix.h>
-#import <AVFoundation/AVAssetTrack.h>
-#import <AVFoundation/AVPlayerItem.h>
-#import <AVFoundation/AVFoundation.h>
 
 @interface xhMediaViewController ()
 {
 
     NSURL           *fileURL;
 }
-@property (nonatomic, strong)    AVPlayer                   *myAVPlayer;
-@property (nonatomic, strong)    AVPlayerLayer              *myAVPlayerLayer;
+
 @end
 
 @implementation xhMediaViewController
 @synthesize shouldRepeat;
+@synthesize myAVPlayer;
+@synthesize myAVPlayerLayer;
+@synthesize playerItem;
 
 - (id)initWithURL:(NSURL *)url
 {
     if (self == [super init]) {
+        self.view.frame = [[UIScreen mainScreen] bounds];
         fileURL = url;
+        [self playWithURL:fileURL];
     }
     return self;
 }
@@ -44,50 +41,34 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    [self playWithURL:fileURL];
+//    [self playWithURL:fileURL];
+    self.view.frame = [[UIScreen mainScreen] bounds];
 }
 
 - (void)playWithURL:(NSURL *)url
 {
-    if (_myAVPlayer) {
-        _myAVPlayer = nil;
-        [_myAVPlayerLayer removeFromSuperlayer];
-        _myAVPlayerLayer = nil;
+    if (myAVPlayer) {
+        myAVPlayer = nil;
+        [myAVPlayerLayer removeFromSuperlayer];
+        myAVPlayerLayer = nil;
+        playerItem = nil;
         [[NSNotificationCenter defaultCenter] removeObserver:self];
     }
     
-    if (url) {
-        _myAVPlayer = [[AVPlayer alloc] initWithURL:url];
-    }
-    else {
-        _myAVPlayer = [[AVPlayer alloc] initWithURL:fileURL];
-    }
-    _myAVPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:_myAVPlayer];
-    CGRect frame = [[UIScreen mainScreen] bounds];
-    _myAVPlayerLayer.frame = frame;
-    [self.view.layer addSublayer: _myAVPlayerLayer];
+    playerItem = [AVPlayerItem playerItemWithURL:url];
+    myAVPlayer = [[AVPlayer alloc] initWithPlayerItem:playerItem];
+    myAVPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:myAVPlayer];
+    CGRect frame = self.view.bounds;
+    myAVPlayerLayer.frame = frame;
+    myAVPlayerLayer.backgroundColor = [UIColor redColor].CGColor;
+    [self.view.layer addSublayer: myAVPlayerLayer];
     
-    [_myAVPlayer play];
+    [myAVPlayer play];
     
-    NSLog(@"Video started playing!");
-    
-    _myAVPlayer.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playerItemDidReachEnd:)
-                                                 name:AVPlayerItemDidPlayToEndTimeNotification
-                                               object:[_myAVPlayer currentItem]];
 }
 
-
-- (void)playerItemDidReachEnd:(NSNotification *)notification
-{
-    NSLog(@"The current item is ");
-    AVPlayerItem *item = [notification object];
-    [item seekToTime:kCMTimeZero];
-//    [myAVPlayer play];
-//    [myAVPlayer seekToTime:kCMTimeZero];
-
+-(void) viewWillLayoutSubviews {
+    self.view.frame = [[UIScreen mainScreen] bounds];
 }
 
 - (void)didReceiveMemoryWarning

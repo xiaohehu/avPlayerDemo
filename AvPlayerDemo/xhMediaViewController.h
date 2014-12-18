@@ -7,11 +7,20 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <AVFoundation/AVPlayer.h>
+#import <AVFoundation/AVAsset.h>
+#import <AVFoundation/AVMediaFormat.h>
+#import <AVFoundation/AVAudioMix.h>
+#import <AVFoundation/AVAssetTrack.h>
+#import <AVFoundation/AVPlayerItem.h>
+#import <AVFoundation/AVFoundation.h>
 
 @interface xhMediaViewController : UIViewController
 
-@property (nonatomic, readwrite)        BOOL            shouldRepeat;
-
+@property (nonatomic, readwrite)        BOOL                       shouldRepeat;
+@property (nonatomic, strong)           AVPlayerItem               *playerItem;
+@property (nonatomic, strong)           AVPlayer                   *myAVPlayer;
+@property (nonatomic, strong)           AVPlayerLayer              *myAVPlayerLayer;
 
 - (id)initWithURL:(NSURL *)url;
 - (void)playWithURL:(NSURL *)url;

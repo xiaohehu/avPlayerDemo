@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		82BD643F1A436EF400E9E240 /* Images-2.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 82BD643E1A436EF400E9E240 /* Images-2.xcassets */; };
 		82F4AA121A431889001639EA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 82F4AA111A431889001639EA /* main.m */; };
 		82F4AA151A431889001639EA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 82F4AA141A431889001639EA /* AppDelegate.m */; };
 		82F4AA181A431889001639EA /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 82F4AA171A431889001639EA /* ViewController.m */; };
@@ -31,6 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		82BD643E1A436EF400E9E240 /* Images-2.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Images-2.xcassets"; sourceTree = "<group>"; };
 		82F4AA0C1A431889001639EA /* AvPlayerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AvPlayerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		82F4AA101A431889001639EA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82F4AA111A431889001639EA /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 				82F4AA191A431889001639EA /* Main.storyboard */,
 				82F4AA1C1A431889001639EA /* Images.xcassets */,
 				82F4AA1E1A431889001639EA /* LaunchScreen.xib */,
+				82BD643E1A436EF400E9E240 /* Images-2.xcassets */,
 				82F4AA0F1A431889001639EA /* Supporting Files */,
 			);
 			path = AvPlayerDemo;
@@ -226,6 +229,7 @@
 				82F4AA1B1A431889001639EA /* Main.storyboard in Resources */,
 				82F4AA401A4336E1001639EA /* neoscape_bug.mov in Resources */,
 				82F4AA201A431889001639EA /* LaunchScreen.xib in Resources */,
+				82BD643F1A436EF400E9E240 /* Images-2.xcassets in Resources */,
 				82F4AA1D1A431889001639EA /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -371,6 +375,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				INFOPLIST_FILE = AvPlayerDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -382,6 +387,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				INFOPLIST_FILE = AvPlayerDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -442,6 +448,7 @@
 				82F4AA311A431889001639EA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		82F4AA321A431889001639EA /* Build configuration list for PBXNativeTarget "AvPlayerDemoTests" */ = {
 			isa = XCConfigurationList;
@@ -450,6 +457,7 @@
 				82F4AA341A431889001639EA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
