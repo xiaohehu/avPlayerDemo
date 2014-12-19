@@ -40,8 +40,12 @@
 
 - (void)didRemoveFromSuperView:mediaVC
 {
-    [_player.view removeFromSuperview];
-    _player.view = nil;
+    [UIView animateWithDuration:0.33 animations:^{
+        _player.view.alpha = 0.0;
+    } completion:^(BOOL finished){
+        [_player.view removeFromSuperview];
+        _player.view = nil;
+    }];
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

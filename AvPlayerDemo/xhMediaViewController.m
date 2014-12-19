@@ -190,6 +190,7 @@
     uiv_controlPanel.hidden = NO;
     uiv_topContainer.alpha = 1.0;
     uiv_topContainer.hidden = NO;
+    myAVPlayerLayer.backgroundColor = [UIColor whiteColor].CGColor;
     UISlider *slider = sender;
     CMTime newTime = CMTimeMakeWithSeconds(slider.value/1000,600);
     [myAVPlayer seekToTime:newTime
@@ -204,13 +205,13 @@
 
 - (void)createSliderTimer
 {
-    sliederTimer = [NSTimer scheduledTimerWithTimeInterval:0.04 target:self selector:@selector(updateSlider) userInfo:nil repeats:YES];
+    sliederTimer = [NSTimer scheduledTimerWithTimeInterval:0.001 target:self selector:@selector(updateSlider) userInfo:nil repeats:YES];
 }
 
 - (void)updateSlider
 {
     uisl_timerBar.maximumValue = [self currentItemDuration];
-    uisl_timerBar.value = [self curretnItemTime]*1000;
+    uisl_timerBar.value = [self curretnItemTime];
 }
 
 - (float)currentItemDuration
@@ -223,7 +224,7 @@
 - (float)curretnItemTime
 {
     float time = CMTimeGetSeconds([myAVPlayer currentTime]);
-    return time;
+    return time*1000;
 }
 
 #pragma mark - Create Done Button
@@ -242,6 +243,7 @@
 
 - (void) tapDoneButton:(id)sender
 {
+    [myAVPlayer pause];
     [self.delegate didRemoveFromSuperView:self];
 }
 
