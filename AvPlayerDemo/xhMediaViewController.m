@@ -14,6 +14,7 @@
     NSURL           *fileURL;
     UIView          *uiv_controlPanel;
     UIButton        *uib_playPause;
+    NSTimer         *checkTimer;
 }
 
 @end
@@ -40,20 +41,19 @@
     // Do any additional setup after loading the view.
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(playerItemDidReachEnd:)
-                                                 name:AVPlayerItemDidPlayToEndTimeNotification
-                                               object:nil];
+                                             name:AVPlayerItemDidPlayToEndTimeNotification
+                                             object:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
-//    [self playWithURL:fileURL];
     self.view.frame = [[UIScreen mainScreen] bounds];
-    [self createControlPanel];
     [self addGestureToView];
+    [self createControlPanel];
+    [self performSelector:@selector(createCheckTimer) withObject:nil afterDelay:2.0];
 }
 
 #pragma mark - Init AVPlayer with the URL
-// Init AVPlayer with the URL
 - (void)playWithURL:(NSURL *)url
 {
     if (myAVPlayer) {
@@ -99,18 +99,19 @@
  
     // Size contstraints
     NSArray *control_constraint_H = [NSLayoutConstraint
-                                    constraintsWithVisualFormat:@"V:[uiv_controlPanel(60)]"
-                                    options:0
-                                    metrics:nil
-                                    views:NSDictionaryOfVariableBindings(uiv_controlPanel)];
+                                     constraintsWithVisualFormat:@"V:[uiv_controlPanel(60)]"
+                                     options:0
+                                     metrics:nil
+                                     views:NSDictionaryOfVariableBindings(uiv_controlPanel)];
 
     NSArray *control_constraint_V = [NSLayoutConstraint
-                                constraintsWithVisualFormat:@"H:[uiv_controlPanel(300)]"
-                                options:0
-                                metrics:nil
-                                views:NSDictionaryOfVariableBindings(uiv_controlPanel)];
+                                     constraintsWithVisualFormat:@"H:[uiv_controlPanel(300)]"
+                                     options:0
+                                     metrics:nil
+                                     views:NSDictionaryOfVariableBindings(uiv_controlPanel)];
     [self.view addConstraints: control_constraint_H];
     [self.view addConstraints: control_constraint_V];
+    
     // Position constraints
     NSArray *constraints = [NSLayoutConstraint
                             constraintsWithVisualFormat:@"V:[uiv_controlPanel]-offsetBottom-|"
@@ -122,12 +123,12 @@
     
     [self.view addConstraint:
         [NSLayoutConstraint constraintWithItem:uiv_controlPanel
-                              attribute:NSLayoutAttributeCenterX
-                              relatedBy:NSLayoutRelationEqual
-                                 toItem:self.view
-                              attribute:NSLayoutAttributeCenterX
-                             multiplier:1
-                               constant:0]];
+                                     attribute:NSLayoutAttributeCenterX
+                                     relatedBy:NSLayoutRelationEqual
+                                     toItem:self.view
+                                     attribute:NSLayoutAttributeCenterX
+                                     multiplier:1
+                                     constant:0]];
     
     [self addControlButtons];
 
@@ -167,22 +168,51 @@
 
 - (void)tapOnPlayer:(UIGestureRecognizer *)gesture
 {
-    if (uiv_controlPanel.hidden)
-    {
-        uiv_controlPanel.hidden = NO;
-        [UIView animateWithDuration:0.3 animations:^{
-            myAVPlayerLayer.backgroundColor = [UIColor whiteColor].CGColor;
-            uiv_controlPanel.alpha = 1.0;
-        } completion:^(BOOL finished){        }];
+    [self hidePanel];
+    [self unhidePanel];
+}
+
+#pragma mark - Add timer to hide control panel
+
+- (void)createCheckTimer
+{
+        checkTimer =[NSTimer scheduledTimerWithTimeInterval:5.0
+                            target:self
+                            selector:@selector(checkControlPanel)
+                            userInfo:nil
+                            repeats:YES];
+}
+
+- (void) checkControlPanel
+{
+    if (!uiv_controlPanel.hidden) {
+        [checkTimer invalidate];
+        [self hidePanel];
+        [self createCheckTimer];
     }
-    else
-    {
+}
+
+#pragma mark - Un/Hide control panel
+- (void)hidePanel
+{
+    if (!uiv_controlPanel.hidden) {
         [UIView animateWithDuration:0.3 animations:^{
             myAVPlayerLayer.backgroundColor = [UIColor blackColor].CGColor;
             uiv_controlPanel.alpha = 0.0;
         } completion:^(BOOL finished){
             uiv_controlPanel.hidden = YES;
         }];
+    }
+}
+
+- (void)unhidePanel
+{
+    if (uiv_controlPanel.hidden) {
+        uiv_controlPanel.hidden = NO;
+        [UIView animateWithDuration:0.3 animations:^{
+            myAVPlayerLayer.backgroundColor = [UIColor whiteColor].CGColor;
+            uiv_controlPanel.alpha = 1.0;
+        } completion:^(BOOL finished){        }];
     }
 }
 
