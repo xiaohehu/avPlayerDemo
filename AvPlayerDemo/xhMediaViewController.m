@@ -13,8 +13,11 @@
 
     NSURL           *fileURL;
     UIView          *uiv_controlPanel;
+    UIView          *uiv_topContainer;
     UIButton        *uib_playPause;
+    UISlider        *uisl_timerBar;
     NSTimer         *checkTimer;
+    NSTimer         *sliederTimer;
 }
 
 @end
@@ -50,7 +53,9 @@
     self.view.frame = [[UIScreen mainScreen] bounds];
     [self addGestureToView];
     [self createControlPanel];
+    [self createTopContainer];
     [self performSelector:@selector(createCheckTimer) withObject:nil afterDelay:2.0];
+    [self createSliderTimer];
 }
 
 #pragma mark - Init AVPlayer with the URL
@@ -78,12 +83,129 @@
 #pragma mark Listen avplayer's notification when reaches end
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
+    [uisl_timerBar setValue:0.0];
     if (repeat) {
         [myAVPlayer seekToTime:kCMTimeZero];
         [myAVPlayer play];
     }
     else
         return;
+}
+
+- (void)createTopContainer
+{
+    uiv_topContainer = [UIView new];
+    uiv_topContainer.translatesAutoresizingMaskIntoConstraints = NO;
+    [uiv_topContainer setBackgroundColor:[UIColor colorWithWhite:1.0 alpha:0.6]];
+    [self.view addSubview:uiv_topContainer];
+    
+    // Size contstraints
+    NSArray *control_constraint_H = [NSLayoutConstraint
+                                     constraintsWithVisualFormat:@"V:[uiv_topContainer(60)]"
+                                     options:0
+                                     metrics:nil
+                                     views:NSDictionaryOfVariableBindings(uiv_topContainer)];
+    
+    NSArray *control_constraint_V = [NSLayoutConstraint
+                                     constraintsWithVisualFormat:@"H:|[uiv_topContainer]|"
+                                     options:0
+                                     metrics:nil
+                                     views:NSDictionaryOfVariableBindings(uiv_topContainer)];
+    [self.view addConstraints: control_constraint_H];
+    [self.view addConstraints: control_constraint_V];
+    
+    // Position constraints
+    NSArray *constraints = [NSLayoutConstraint
+                            constraintsWithVisualFormat:@"V:|-offsetTop-[uiv_topContainer]"
+                            options:0
+                            metrics:@{@"offsetTop": @0}
+                            views:NSDictionaryOfVariableBindings(uiv_topContainer)];
+    
+    [self.view addConstraints: constraints];
+    
+    [self.view addConstraint:
+    [NSLayoutConstraint constraintWithItem:uiv_topContainer
+                                  attribute:NSLayoutAttributeCenterX
+                                  relatedBy:NSLayoutRelationEqual
+                                  toItem:self.view
+                                  attribute:NSLayoutAttributeCenterX
+                                  multiplier:1
+                                  constant:0]];
+    [self createSlider];
+}
+
+- (void)createSlider
+{
+    uisl_timerBar = [UISlider new];
+    uisl_timerBar.translatesAutoresizingMaskIntoConstraints = NO;
+    [uisl_timerBar setBackgroundColor:[UIColor clearColor]];
+    uisl_timerBar.minimumValue = 0.0;
+    NSLog(@"current item is %@", myAVPlayer.currentItem);
+    uisl_timerBar.maximumValue = [self currentItemDuration];;
+    uisl_timerBar.continuous = YES;
+    [uisl_timerBar addTarget:self action:@selector(sliding:) forControlEvents:UIControlEventValueChanged];
+    
+    [uiv_topContainer addSubview:uisl_timerBar];
+
+    // Position constraints
+    NSArray *constraints = [NSLayoutConstraint
+                            constraintsWithVisualFormat:@"V:|-offsetTop-[uisl_timerBar]"
+                            options:0
+                            metrics:@{@"offsetTop": @10}
+                            views:NSDictionaryOfVariableBindings(uisl_timerBar)];
+    NSArray *constraints1 = [NSLayoutConstraint
+                            constraintsWithVisualFormat:@"H:|-offsetLeft-[uisl_timerBar]"
+                            options:0
+                            metrics:@{@"offsetLeft": @100}
+                            views:NSDictionaryOfVariableBindings(uisl_timerBar)];
+    NSArray *constraints2 = [NSLayoutConstraint
+                            constraintsWithVisualFormat:@"H:[uisl_timerBar]-offsetRight-|"
+                            options:0
+                            metrics:@{@"offsetRight": @100}
+                            views:NSDictionaryOfVariableBindings(uisl_timerBar)];
+    
+    [self.view addConstraints: constraints];
+    [self.view addConstraints: constraints1];
+    [self.view addConstraints: constraints2];
+    [self.view addConstraint:
+     [NSLayoutConstraint constraintWithItem:uisl_timerBar
+                                  attribute:NSLayoutAttributeCenterX
+                                  relatedBy:NSLayoutRelationEqual
+                                  toItem:self.view
+                                  attribute:NSLayoutAttributeCenterX
+                                  multiplier:1
+                                  constant:0]];
+}
+
+- (void)sliding:(id)sender
+{
+    UISlider *slider = sender;
+    CMTime newTime = CMTimeMakeWithSeconds(slider.value/1000, 1);
+    [myAVPlayer seekToTime:newTime];
+}
+
+- (void)createSliderTimer
+{
+    sliederTimer = [NSTimer scheduledTimerWithTimeInterval:0.001 target:self selector:@selector(updateSlider) userInfo:nil repeats:YES];
+}
+
+- (void)updateSlider
+{
+    uisl_timerBar.maximumValue = [self currentItemDuration];
+    uisl_timerBar.value = [self curretnItemTime]*1000;
+}
+
+- (float)currentItemDuration
+{
+    AVAsset *asset = [myAVPlayer.currentItem asset];
+    float duration = CMTimeGetSeconds([asset duration]);
+    return duration*1000;
+}
+
+- (float)curretnItemTime
+{
+    float time = CMTimeGetSeconds([myAVPlayer currentTime]);
+    return time;
 }
 
 #pragma mark - Create the Control Panle
@@ -170,6 +292,7 @@
 {
     [self hidePanel];
     [self unhidePanel];
+    NSLog(@"%f",[self curretnItemTime]);
 }
 
 #pragma mark - Add timer to hide control panel
