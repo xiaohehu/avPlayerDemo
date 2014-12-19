@@ -14,9 +14,14 @@
 #import <AVFoundation/AVAssetTrack.h>
 #import <AVFoundation/AVPlayerItem.h>
 #import <AVFoundation/AVFoundation.h>
+@class xhMediaViewController;
+@protocol xhMediaDelegate
+- (void)didRemoveFromSuperView:(xhMediaViewController *)mediaVC;
+@end
 
 @interface xhMediaViewController : UIViewController
 
+@property (nonatomic, strong)           id                         delegate;
 @property (nonatomic, readwrite)        BOOL                       repeat;
 @property (nonatomic, strong)           AVPlayerItem               *playerItem;
 @property (nonatomic, strong)           AVPlayer                   *myAVPlayer;

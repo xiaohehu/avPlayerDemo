@@ -18,11 +18,13 @@
     UISlider        *uisl_timerBar;
     NSTimer         *checkTimer;
     NSTimer         *sliederTimer;
+    UIButton        *uib_doneButton;
 }
 
 @end
 
 @implementation xhMediaViewController
+@synthesize delegate;
 @synthesize repeat;
 @synthesize myAVPlayer;
 @synthesize myAVPlayerLayer;
@@ -56,6 +58,7 @@
     [self createTopContainer];
     [self performSelector:@selector(createCheckTimer) withObject:nil afterDelay:2.0];
     [self createSliderTimer];
+    [self createDoneButton];
 }
 
 #pragma mark - Init AVPlayer with the URL
@@ -84,6 +87,9 @@
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
     [uisl_timerBar setValue:0.0];
+    [checkTimer invalidate];
+    checkTimer = nil;
+    [self createCheckTimer];
     if (repeat) {
         [myAVPlayer seekToTime:kCMTimeZero];
         [myAVPlayer play];
@@ -96,7 +102,7 @@
 {
     uiv_topContainer = [UIView new];
     uiv_topContainer.translatesAutoresizingMaskIntoConstraints = NO;
-    [uiv_topContainer setBackgroundColor:[UIColor colorWithWhite:1.0 alpha:0.6]];
+    [uiv_topContainer setBackgroundColor:[UIColor colorWithWhite:0.8 alpha:0.6]];
     [self.view addSubview:uiv_topContainer];
     
     // Size contstraints
@@ -140,11 +146,10 @@
     uisl_timerBar.translatesAutoresizingMaskIntoConstraints = NO;
     [uisl_timerBar setBackgroundColor:[UIColor clearColor]];
     uisl_timerBar.minimumValue = 0.0;
-    NSLog(@"current item is %@", myAVPlayer.currentItem);
     uisl_timerBar.maximumValue = [self currentItemDuration];;
     uisl_timerBar.continuous = YES;
     [uisl_timerBar addTarget:self action:@selector(sliding:) forControlEvents:UIControlEventValueChanged];
-    
+    [uisl_timerBar addTarget:self action:@selector(finishedSliding:) forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchUpOutside)];
     [uiv_topContainer addSubview:uisl_timerBar];
 
     // Position constraints
@@ -179,14 +184,27 @@
 
 - (void)sliding:(id)sender
 {
+    [checkTimer invalidate];
+    checkTimer = nil;
+    uiv_controlPanel.alpha = 1.0;
+    uiv_controlPanel.hidden = NO;
+    uiv_topContainer.alpha = 1.0;
+    uiv_topContainer.hidden = NO;
     UISlider *slider = sender;
-    CMTime newTime = CMTimeMakeWithSeconds(slider.value/1000, 1);
-    [myAVPlayer seekToTime:newTime];
+    CMTime newTime = CMTimeMakeWithSeconds(slider.value/1000,600);
+    [myAVPlayer seekToTime:newTime
+                toleranceBefore:kCMTimeZero
+                toleranceAfter:kCMTimeZero];
+}
+
+- (void)finishedSliding:(id)sener
+{
+    [self createCheckTimer];
 }
 
 - (void)createSliderTimer
 {
-    sliederTimer = [NSTimer scheduledTimerWithTimeInterval:0.001 target:self selector:@selector(updateSlider) userInfo:nil repeats:YES];
+    sliederTimer = [NSTimer scheduledTimerWithTimeInterval:0.04 target:self selector:@selector(updateSlider) userInfo:nil repeats:YES];
 }
 
 - (void)updateSlider
@@ -206,6 +224,25 @@
 {
     float time = CMTimeGetSeconds([myAVPlayer currentTime]);
     return time;
+}
+
+#pragma mark - Create Done Button
+
+- (void)createDoneButton
+{
+    uib_doneButton = [UIButton buttonWithType: UIButtonTypeCustom];
+    uib_doneButton.frame = CGRectMake(0.0, 0.0, 80.0, 60.0);
+    uib_doneButton.backgroundColor = [UIColor clearColor];
+    [uib_doneButton setTitle:@"Done" forState:UIControlStateNormal];
+    [uib_doneButton setTintColor:[UIColor grayColor]];
+    uib_doneButton.showsTouchWhenHighlighted = YES;
+    [uiv_topContainer addSubview: uib_doneButton];
+    [uib_doneButton addTarget:self action:@selector(tapDoneButton:) forControlEvents:UIControlEventTouchUpInside];
+}
+
+- (void) tapDoneButton:(id)sender
+{
+    [self.delegate didRemoveFromSuperView:self];
 }
 
 #pragma mark - Create the Control Panle
@@ -290,26 +327,29 @@
 
 - (void)tapOnPlayer:(UIGestureRecognizer *)gesture
 {
+    [checkTimer invalidate];
+    checkTimer = nil;
     [self hidePanel];
     [self unhidePanel];
-    NSLog(@"%f",[self curretnItemTime]);
+    [self createCheckTimer];
 }
 
 #pragma mark - Add timer to hide control panel
 
 - (void)createCheckTimer
 {
-        checkTimer =[NSTimer scheduledTimerWithTimeInterval:5.0
-                            target:self
-                            selector:@selector(checkControlPanel)
-                            userInfo:nil
-                            repeats:YES];
+    checkTimer =[NSTimer scheduledTimerWithTimeInterval:3.0
+                         target:self
+                         selector:@selector(checkControlPanel)
+                         userInfo:nil
+                         repeats:YES];
 }
 
 - (void) checkControlPanel
 {
     if (!uiv_controlPanel.hidden) {
         [checkTimer invalidate];
+        checkTimer = nil;
         [self hidePanel];
         [self createCheckTimer];
     }
@@ -322,26 +362,60 @@
         [UIView animateWithDuration:0.3 animations:^{
             myAVPlayerLayer.backgroundColor = [UIColor blackColor].CGColor;
             uiv_controlPanel.alpha = 0.0;
+            uiv_topContainer.alpha = 0.0;
         } completion:^(BOOL finished){
             uiv_controlPanel.hidden = YES;
+            uiv_topContainer.hidden = YES;
         }];
     }
+    else
+        return;
 }
 
 - (void)unhidePanel
 {
     if (uiv_controlPanel.hidden) {
         uiv_controlPanel.hidden = NO;
+        uiv_topContainer.hidden = NO;
         [UIView animateWithDuration:0.3 animations:^{
             myAVPlayerLayer.backgroundColor = [UIColor whiteColor].CGColor;
             uiv_controlPanel.alpha = 1.0;
+            uiv_topContainer.alpha = 1.0;
         } completion:^(BOOL finished){        }];
     }
+    else
+        return;
 }
 
 -(void) viewWillLayoutSubviews {
     self.view.frame = self.view.superview.bounds;
     myAVPlayerLayer.frame = self.view.bounds;
+}
+
+#pragma mark - Clean Memory
+- (void)viewDidDisappear:(BOOL)animated
+{
+    [myAVPlayer pause];
+    myAVPlayer = nil;
+    [myAVPlayerLayer removeFromSuperlayer];
+    myAVPlayerLayer = nil;
+    
+    fileURL = nil;
+    [uiv_controlPanel removeFromSuperview];
+    uiv_controlPanel = nil;
+    [uiv_topContainer removeFromSuperview];
+    uiv_topContainer = nil;
+    [uib_playPause removeFromSuperview];
+    uib_playPause = nil;
+    [uisl_timerBar removeFromSuperview];
+    uisl_timerBar = nil;
+    [uib_doneButton removeFromSuperview];
+    uib_doneButton = nil;
+    [checkTimer invalidate];
+    checkTimer = nil;
+    [sliederTimer invalidate];
+    sliederTimer = nil;
+    
 }
 
 - (void)didReceiveMemoryWarning
