@@ -28,22 +28,10 @@
     NSString *url = [[NSBundle mainBundle]
                      pathForResource:@"neoscape_bug"
                      ofType:@"mov"];
-    
     _player = [[xhMediaViewController alloc] initWithURL:[NSURL fileURLWithPath:url]];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playerItemDidReachEnd:)
-                                                 name:AVPlayerItemDidPlayToEndTimeNotification
-                                               object:[_player.myAVPlayer currentItem]];
-
+    _player.repeat = YES;
     [self.view addSubview: _player.view];    
 }
-
-- (void)playerItemDidReachEnd:(NSNotification *)notification
-{
-    [_player.myAVPlayer seekToTime:kCMTimeZero];
-    [_player.myAVPlayer play];
-}
-
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

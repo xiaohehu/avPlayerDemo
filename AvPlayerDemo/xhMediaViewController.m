@@ -19,6 +19,7 @@
 @end
 
 @implementation xhMediaViewController
+@synthesize repeat;
 @synthesize myAVPlayer;
 @synthesize myAVPlayerLayer;
 @synthesize playerItem;
@@ -37,7 +38,10 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(playerItemDidReachEnd:)
+                                                 name:AVPlayerItemDidPlayToEndTimeNotification
+                                               object:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -45,8 +49,11 @@
 //    [self playWithURL:fileURL];
     self.view.frame = [[UIScreen mainScreen] bounds];
     [self createControlPanel];
+    [self addGestureToView];
 }
 
+#pragma mark - Init AVPlayer with the URL
+// Init AVPlayer with the URL
 - (void)playWithURL:(NSURL *)url
 {
     if (myAVPlayer) {
@@ -68,6 +75,18 @@
     [myAVPlayer play];
 }
 
+#pragma mark Listen avplayer's notification when reaches end
+- (void)playerItemDidReachEnd:(NSNotification *)notification
+{
+    if (repeat) {
+        [myAVPlayer seekToTime:kCMTimeZero];
+        [myAVPlayer play];
+    }
+    else
+        return;
+}
+
+#pragma mark - Create the Control Panle
 - (void)createControlPanel
 {
     uiv_controlPanel = [UIView new];
@@ -135,6 +154,36 @@
         [myAVPlayer pause];
     }
     tappedBtn.selected = !tappedBtn.selected;
+}
+
+#pragma mark - Add Tap Gesutre to whole view
+- (void)addGestureToView
+{
+    UITapGestureRecognizer *tapOnplayer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapOnPlayer:)];
+    tapOnplayer.numberOfTapsRequired = 1;
+    self.view.userInteractionEnabled = YES;
+    [self.view addGestureRecognizer: tapOnplayer];
+}
+
+- (void)tapOnPlayer:(UIGestureRecognizer *)gesture
+{
+    if (uiv_controlPanel.hidden)
+    {
+        uiv_controlPanel.hidden = NO;
+        [UIView animateWithDuration:0.3 animations:^{
+            myAVPlayerLayer.backgroundColor = [UIColor whiteColor].CGColor;
+            uiv_controlPanel.alpha = 1.0;
+        } completion:^(BOOL finished){        }];
+    }
+    else
+    {
+        [UIView animateWithDuration:0.3 animations:^{
+            myAVPlayerLayer.backgroundColor = [UIColor blackColor].CGColor;
+            uiv_controlPanel.alpha = 0.0;
+        } completion:^(BOOL finished){
+            uiv_controlPanel.hidden = YES;
+        }];
+    }
 }
 
 -(void) viewWillLayoutSubviews {
