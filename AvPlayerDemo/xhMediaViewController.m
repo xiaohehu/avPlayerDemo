@@ -70,7 +70,10 @@
         myAVPlayerLayer.backgroundColor = [UIColor blackColor].CGColor;
 }
 
+//----------------------------------------------------
 #pragma mark - Init AVPlayer with the URL
+//----------------------------------------------------
+
 - (void)playWithURL:(NSURL *)url
 {
     if (myAVPlayer) {
@@ -92,7 +95,9 @@
     [myAVPlayer play];
 }
 
+//----------------------------------------------------
 #pragma mark Listen avplayer's notification when reaches end
+//----------------------------------------------------
 - (void)playerItemDidReachEnd:(NSNotification *)notification
 {
     [uisl_timerBar setValue:0.0];
@@ -106,7 +111,11 @@
     else
         return;
 }
+//----------------------------------------------------
+#pragma mark - Top Control View
 
+#pragma mark Create Top Container
+//----------------------------------------------------
 - (void)createTopContainer
 {
     uiv_topContainer = [UIView new];
@@ -149,6 +158,9 @@
     [self createSlider];
 }
 
+//----------------------------------------------------
+#pragma mark Create slider
+//----------------------------------------------------
 - (void)createSlider
 {
     uisl_timerBar = [UISlider new];
@@ -170,12 +182,12 @@
     NSArray *constraints1 = [NSLayoutConstraint
                             constraintsWithVisualFormat:@"H:|-offsetLeft-[uisl_timerBar]"
                             options:0
-                            metrics:@{@"offsetLeft": @150}
+                            metrics:@{@"offsetLeft": @180}
                             views:NSDictionaryOfVariableBindings(uisl_timerBar)];
     NSArray *constraints2 = [NSLayoutConstraint
                             constraintsWithVisualFormat:@"H:[uisl_timerBar]-offsetRight-|"
                             options:0
-                            metrics:@{@"offsetRight": @150}
+                            metrics:@{@"offsetRight": @180}
                             views:NSDictionaryOfVariableBindings(uisl_timerBar)];
     
     [self.view addConstraints: constraints];
@@ -191,6 +203,9 @@
                                   constant:0]];
 }
 
+/*
+ Action of slider
+*/
 - (void)sliding:(id)sender
 {
     [checkTimer invalidate];
@@ -212,11 +227,17 @@
     [self createCheckTimer];
 }
 
+/*
+ Add Timer to slider
+*/
 - (void)createSliderTimer
 {
     sliederTimer = [NSTimer scheduledTimerWithTimeInterval:0.001 target:self selector:@selector(updateSliderAndTimelabel) userInfo:nil repeats:YES];
 }
 
+/*
+ Slider action -- adjust slider's positon and update number of time label
+ */
 - (void)updateSliderAndTimelabel
 {
     uisl_timerBar.maximumValue = [self currentItemDuration];
@@ -229,6 +250,9 @@
     uil_played.text = playedTime;
 }
 
+//----------------------------------------------------
+#pragma mark - Get movie's duration and current time
+//----------------------------------------------------
 - (float)currentItemDuration
 {
     AVAsset *asset = [myAVPlayer.currentItem asset];
@@ -242,8 +266,9 @@
     return time;//*1000;
 }
 
+//----------------------------------------------------
 #pragma mark - Create Time Label
-
+//----------------------------------------------------
 - (void)createTimeLabel
 {
     uil_remain = [UILabel new];
@@ -268,7 +293,7 @@
     NSArray *constraints = [NSLayoutConstraint
                             constraintsWithVisualFormat:@"H:[uil_remain]-offsetBottom-|"
                             options:0
-                            metrics:@{@"offsetBottom": @25}
+                            metrics:@{@"offsetBottom": @80}
                             views:NSDictionaryOfVariableBindings(uil_remain)];
     NSArray *constraints2 = [NSLayoutConstraint
                             constraintsWithVisualFormat:@"V:|-offsetTop-[uil_remain]"
@@ -282,10 +307,11 @@
     int totalDuration = [self currentItemDuration];
     NSString *remainingTime = [NSString stringWithFormat:@"-%02d:%02d:%02d",totalDuration/3600, (totalDuration%3600)/60, (totalDuration%3600)%60];
     uil_remain.text = remainingTime;
+    uil_remain.textAlignment = NSTextAlignmentCenter;
     uil_remain.textColor = [UIColor grayColor];
     
-    uil_played = [[UILabel alloc] initWithFrame:CGRectMake(75.0, 0.0, 70.0, 60.0)];
-    uil_played.textAlignment = NSTextAlignmentJustified;
+    uil_played = [[UILabel alloc] initWithFrame:CGRectMake(80.0, 0.0, 100.0, 60.0)];
+    uil_played.textAlignment = NSTextAlignmentCenter;
     NSString *playedTime = [NSString stringWithFormat:@"00:00:00"];
     uil_played.text = playedTime;
     uil_played.textColor = [UIColor grayColor];
@@ -293,8 +319,9 @@
     
 }
 
+//----------------------------------------------------
 #pragma mark - Create Done Button
-
+//----------------------------------------------------
 - (void)createDoneButton
 {
     uib_doneButton = [UIButton buttonWithType: UIButtonTypeCustom];
@@ -313,7 +340,9 @@
     [self.delegate didRemoveFromSuperView:self];
 }
 
+//----------------------------------------------------
 #pragma mark - Create the Control Panle
+//----------------------------------------------------
 - (void)createControlPanel
 {
     uiv_controlPanel = [UIView new];
@@ -384,7 +413,9 @@
     tappedBtn.selected = !tappedBtn.selected;
 }
 
+//----------------------------------------------------
 #pragma mark - Add Tap Gesutre to whole view
+//----------------------------------------------------
 - (void)addGestureToView
 {
     UITapGestureRecognizer *tapOnplayer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapOnPlayer:)];
@@ -402,15 +433,16 @@
     [self createCheckTimer];
 }
 
+//----------------------------------------------------
 #pragma mark - Add timer to hide control panel
-
+//----------------------------------------------------
 - (void)createCheckTimer
 {
-//    checkTimer =[NSTimer scheduledTimerWithTimeInterval:3.0
-//                         target:self
-//                         selector:@selector(checkControlPanel)
-//                         userInfo:nil
-//                         repeats:YES];
+    checkTimer =[NSTimer scheduledTimerWithTimeInterval:3.0
+                         target:self
+                         selector:@selector(checkControlPanel)
+                         userInfo:nil
+                         repeats:YES];
 }
 
 - (void) checkControlPanel
@@ -423,7 +455,9 @@
     }
 }
 
+//----------------------------------------------------
 #pragma mark - Un/Hide control panel
+//----------------------------------------------------
 - (void)hidePanel
 {
     if (!uiv_controlPanel.hidden) {
@@ -455,12 +489,17 @@
         return;
 }
 
+//----------------------------------------------------
+#pragma mark - Relayout views
+//----------------------------------------------------
 -(void) viewWillLayoutSubviews {
     self.view.frame = self.view.superview.bounds;
     myAVPlayerLayer.frame = self.view.bounds;
 }
 
+//----------------------------------------------------
 #pragma mark - Clean Memory
+//----------------------------------------------------
 - (void)viewDidDisappear:(BOOL)animated
 {
     [myAVPlayer pause];
@@ -483,6 +522,10 @@
     checkTimer = nil;
     [sliederTimer invalidate];
     sliederTimer = nil;
+    [uil_played removeFromSuperview];
+    uil_played = nil;
+    [uil_remain removeFromSuperview];
+    uil_remain = nil;
     
 }
 
