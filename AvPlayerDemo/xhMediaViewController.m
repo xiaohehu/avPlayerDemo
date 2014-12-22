@@ -29,6 +29,7 @@
 @synthesize myAVPlayer;
 @synthesize myAVPlayerLayer;
 @synthesize playerItem;
+@synthesize controlPanel;
 
 - (id)initWithURL:(NSURL *)url
 {
@@ -53,12 +54,14 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     self.view.frame = [[UIScreen mainScreen] bounds];
-    [self addGestureToView];
-    [self createControlPanel];
-    [self createTopContainer];
-    [self performSelector:@selector(createCheckTimer) withObject:nil afterDelay:2.0];
-    [self createSliderTimer];
-    [self createDoneButton];
+    if (controlPanel) {
+        [self addGestureToView];
+        [self createControlPanel];
+        [self createTopContainer];
+        [self performSelector:@selector(createCheckTimer) withObject:nil afterDelay:2.0];
+        [self createSliderTimer];
+        [self createDoneButton];
+    }
 }
 
 #pragma mark - Init AVPlayer with the URL
@@ -77,7 +80,13 @@
     myAVPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:myAVPlayer];
     CGRect frame = self.view.bounds;
     myAVPlayerLayer.frame = frame;
-    myAVPlayerLayer.backgroundColor = [UIColor whiteColor].CGColor;
+    if (controlPanel) {
+        myAVPlayerLayer.backgroundColor = [UIColor whiteColor].CGColor;
+    }
+    else {
+        myAVPlayerLayer.backgroundColor = [UIColor blackColor].CGColor;
+    }
+    
     [self.view.layer addSublayer: myAVPlayerLayer];
     
     [myAVPlayer play];

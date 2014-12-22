@@ -23,6 +23,7 @@
 
 @property (nonatomic, strong)           id                         delegate;
 @property (nonatomic, readwrite)        BOOL                       repeat;
+@property (nonatomic, readwrite)        BOOL                       controlPanel;
 @property (nonatomic, strong)           AVPlayerItem               *playerItem;
 @property (nonatomic, strong)           AVPlayer                   *myAVPlayer;
 @property (nonatomic, strong)           AVPlayerLayer              *myAVPlayerLayer;

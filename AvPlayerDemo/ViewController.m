@@ -35,7 +35,8 @@
     _player = [[xhMediaViewController alloc] initWithURL:[NSURL fileURLWithPath:url]];
     _player.delegate = self;
     _player.repeat = YES;
-    [self.view addSubview: _player.view];    
+//    _player.controlPanel = YES;
+    [self.view addSubview: _player.view];
 }
 
 - (void)didRemoveFromSuperView:mediaVC
