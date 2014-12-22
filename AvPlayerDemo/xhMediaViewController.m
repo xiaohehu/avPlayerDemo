@@ -19,6 +19,8 @@
     NSTimer         *checkTimer;
     NSTimer         *sliederTimer;
     UIButton        *uib_doneButton;
+    UILabel         *uil_remain;
+    UILabel         *uil_played;
 }
 
 @end
@@ -61,7 +63,11 @@
         [self performSelector:@selector(createCheckTimer) withObject:nil afterDelay:2.0];
         [self createSliderTimer];
         [self createDoneButton];
+        [self createTimeLabel];
+        myAVPlayerLayer.backgroundColor = [UIColor whiteColor].CGColor;
     }
+    else
+        myAVPlayerLayer.backgroundColor = [UIColor blackColor].CGColor;
 }
 
 #pragma mark - Init AVPlayer with the URL
@@ -80,13 +86,7 @@
     myAVPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:myAVPlayer];
     CGRect frame = self.view.bounds;
     myAVPlayerLayer.frame = frame;
-    if (controlPanel) {
-        myAVPlayerLayer.backgroundColor = [UIColor whiteColor].CGColor;
-    }
-    else {
-        myAVPlayerLayer.backgroundColor = [UIColor blackColor].CGColor;
-    }
-    
+    myAVPlayerLayer.backgroundColor = [UIColor whiteColor].CGColor;
     [self.view.layer addSublayer: myAVPlayerLayer];
     
     [myAVPlayer play];
@@ -165,17 +165,17 @@
     NSArray *constraints = [NSLayoutConstraint
                             constraintsWithVisualFormat:@"V:|-offsetTop-[uisl_timerBar]"
                             options:0
-                            metrics:@{@"offsetTop": @10}
+                            metrics:@{@"offsetTop": @15}
                             views:NSDictionaryOfVariableBindings(uisl_timerBar)];
     NSArray *constraints1 = [NSLayoutConstraint
                             constraintsWithVisualFormat:@"H:|-offsetLeft-[uisl_timerBar]"
                             options:0
-                            metrics:@{@"offsetLeft": @100}
+                            metrics:@{@"offsetLeft": @150}
                             views:NSDictionaryOfVariableBindings(uisl_timerBar)];
     NSArray *constraints2 = [NSLayoutConstraint
                             constraintsWithVisualFormat:@"H:[uisl_timerBar]-offsetRight-|"
                             options:0
-                            metrics:@{@"offsetRight": @100}
+                            metrics:@{@"offsetRight": @150}
                             views:NSDictionaryOfVariableBindings(uisl_timerBar)];
     
     [self.view addConstraints: constraints];
@@ -201,7 +201,7 @@
     uiv_topContainer.hidden = NO;
     myAVPlayerLayer.backgroundColor = [UIColor whiteColor].CGColor;
     UISlider *slider = sender;
-    CMTime newTime = CMTimeMakeWithSeconds(slider.value/1000,600);
+    CMTime newTime = CMTimeMakeWithSeconds(slider.value,600);
     [myAVPlayer seekToTime:newTime
                 toleranceBefore:kCMTimeZero
                 toleranceAfter:kCMTimeZero];
@@ -214,26 +214,83 @@
 
 - (void)createSliderTimer
 {
-    sliederTimer = [NSTimer scheduledTimerWithTimeInterval:0.001 target:self selector:@selector(updateSlider) userInfo:nil repeats:YES];
+    sliederTimer = [NSTimer scheduledTimerWithTimeInterval:0.001 target:self selector:@selector(updateSliderAndTimelabel) userInfo:nil repeats:YES];
 }
 
-- (void)updateSlider
+- (void)updateSliderAndTimelabel
 {
     uisl_timerBar.maximumValue = [self currentItemDuration];
     uisl_timerBar.value = [self curretnItemTime];
+    
+    int totalDuration = (int)[self currentItemDuration] - (int)[self curretnItemTime];
+    NSString *remainingTime = [NSString stringWithFormat:@"-%02d:%02d:%02d",totalDuration/3600, (totalDuration%3600)/60, (totalDuration%3600)%60];
+    uil_remain.text = remainingTime;
+    NSString *playedTime = [NSString stringWithFormat:@"%02d:%02d:%02d",(int)[self curretnItemTime]/3600, ((int)[self curretnItemTime]%3600)/60, ((int)[self curretnItemTime]%3600)%60];
+    uil_played.text = playedTime;
 }
 
 - (float)currentItemDuration
 {
     AVAsset *asset = [myAVPlayer.currentItem asset];
     float duration = CMTimeGetSeconds([asset duration]);
-    return duration*1000;
+    return duration;//*1000;
 }
 
 - (float)curretnItemTime
 {
     float time = CMTimeGetSeconds([myAVPlayer currentTime]);
-    return time*1000;
+    return time;//*1000;
+}
+
+#pragma mark - Create Time Label
+
+- (void)createTimeLabel
+{
+    uil_remain = [UILabel new];
+    uil_remain.translatesAutoresizingMaskIntoConstraints = NO;
+    uil_remain.backgroundColor = [UIColor clearColor];
+    [uiv_topContainer addSubview: uil_remain];
+    // Size contstraints
+    NSArray *label_constraint_H = [NSLayoutConstraint
+                                     constraintsWithVisualFormat:@"V:[uil_remain(60)]"
+                                     options:0
+                                     metrics:nil
+                                     views:NSDictionaryOfVariableBindings(uil_remain)];
+    
+    NSArray *label_constraint_V = [NSLayoutConstraint
+                                     constraintsWithVisualFormat:@"H:[uil_remain(100)]"
+                                     options:0
+                                     metrics:nil
+                                     views:NSDictionaryOfVariableBindings(uil_remain)];
+    [self.view addConstraints: label_constraint_H];
+    [self.view addConstraints: label_constraint_V];
+    // Position constraints
+    NSArray *constraints = [NSLayoutConstraint
+                            constraintsWithVisualFormat:@"H:[uil_remain]-offsetBottom-|"
+                            options:0
+                            metrics:@{@"offsetBottom": @25}
+                            views:NSDictionaryOfVariableBindings(uil_remain)];
+    NSArray *constraints2 = [NSLayoutConstraint
+                            constraintsWithVisualFormat:@"V:|-offsetTop-[uil_remain]"
+                            options:0
+                            metrics:@{@"offsetTop": @0}
+                            views:NSDictionaryOfVariableBindings(uil_remain)];
+
+    [self.view addConstraints: constraints];
+    [self.view addConstraints: constraints2];
+    
+    int totalDuration = [self currentItemDuration];
+    NSString *remainingTime = [NSString stringWithFormat:@"-%02d:%02d:%02d",totalDuration/3600, (totalDuration%3600)/60, (totalDuration%3600)%60];
+    uil_remain.text = remainingTime;
+    uil_remain.textColor = [UIColor grayColor];
+    
+    uil_played = [[UILabel alloc] initWithFrame:CGRectMake(75.0, 0.0, 70.0, 60.0)];
+    uil_played.textAlignment = NSTextAlignmentJustified;
+    NSString *playedTime = [NSString stringWithFormat:@"00:00:00"];
+    uil_played.text = playedTime;
+    uil_played.textColor = [UIColor grayColor];
+    [uiv_topContainer insertSubview:uil_played belowSubview:uib_doneButton];
+    
 }
 
 #pragma mark - Create Done Button
@@ -349,11 +406,11 @@
 
 - (void)createCheckTimer
 {
-    checkTimer =[NSTimer scheduledTimerWithTimeInterval:3.0
-                         target:self
-                         selector:@selector(checkControlPanel)
-                         userInfo:nil
-                         repeats:YES];
+//    checkTimer =[NSTimer scheduledTimerWithTimeInterval:3.0
+//                         target:self
+//                         selector:@selector(checkControlPanel)
+//                         userInfo:nil
+//                         repeats:YES];
 }
 
 - (void) checkControlPanel
